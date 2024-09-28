@@ -1,7 +1,7 @@
 name: Build
 on: [push]
 env:
-  PROJECT_NAME: ics2csv4all
+  project: ics2csv4all
 jobs:
   #build:
   #  name: Build
@@ -17,7 +17,7 @@ jobs:
   #    - name: Upload artifact
   #      uses: actions/upload-artifact@v4
   #      with:
-  #        name: ${{ env.PROJECT_NAME }}
+  #        name: ${{ env.project }}
   #        path: |
   #          ${{ steps.compile.outputs.BUILT_ARCHIVE }}
   #          ${{ steps.compile.outputs.BUILT_CHECKSUM }}
@@ -42,7 +42,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.PROJECT_NAME }}
+          name: ${{ env.project }}-${{ matrix.target }}
           path: |
             ${{ steps.compile.outputs.BUILT_ARCHIVE }}
             ${{ steps.compile.outputs.BUILT_CHECKSUM }}                    
