@@ -3,14 +3,12 @@ pub mod file;
 pub mod error;
 pub mod helper;
 
-use std::io;
-
 use csv::{Reader, ReaderBuilder};
 use helper::calendar::{get_short_weekday, get_timestamp_localized};
 use chrono::{DateTime, FixedOffset, Local};
 use error::csv::write_error;
-use ui::cli::{get_header, get_input_desired_date};
-use file::json::read_config;
+use ui::cli::{confirm_with_enter, get_header, get_input_desired_date};
+use file::json::{delete, read_config};
 
 
 fn main() {
@@ -185,11 +183,10 @@ fn main() {
         Err(_) => todo!(),
     };
 
-
     match open::with("basic.csv", "notepad") {
         Ok(open_result) => {
             if open_result.success() {
-                println!("File opened...");
+                println!("CSV file opened...");
             }
         },
         Err(error) => {
@@ -198,7 +195,11 @@ fn main() {
         }
     };
 
+    confirm_with_enter();
 
-
+    match delete("basic.csv") {
+        Ok(_) => println!("CSV file deleted..."),
+        Err(_) => todo!(),
+    };
 
 }

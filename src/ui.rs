@@ -22,6 +22,7 @@ pub mod cli {
             Ok(date) => date,
             Err(error) => {
                 parse_error(error);
+                confirm_with_enter();
                 return Err(error);
             }
         };
@@ -37,6 +38,13 @@ pub mod cli {
         println!("----------------------------------------------------------");
         println!("Bitte nachfolgend die zu exportierende Zeitspanne eingeben");
         println!("__________________________________________________________");        
+    }
+
+    pub fn confirm_with_enter() {
+        println!("Bitte Eingabetaste betätigen um Fenster zu schließen.");
+        let mut input = String::new();
+        let result = io::stdin().read_line(&mut input);
+        let _ = result.is_ok();
     }
 
 }
