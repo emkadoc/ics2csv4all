@@ -12,41 +12,37 @@ jobs:
       fail-fast: false
       matrix:
         target: [x86_64-pc-windows-gnu, x86_64-unknown-linux-musl]
-        steps:
-        - name: checkout
-          uses: actions/checkout@v4.2.1
-        - name: compile
-          id: compile
-          uses: rust-build/rust-build.action@v1.4.5
-          with:
-            RUSTTARGET: ${{ matrix.target }}
-            EXTRA_FILES: "README.md LICENSE"
-        - name: upload artifact
-          uses: actions/upload-artifact@v4
-          with:
-            name: ${{ env.project }}-${{ matrix.target }}
-            path: |
-              ${{ steps.compile.outputs.BUILT_ARCHIVE }}
-              ${{ steps.compile.outputs.BUILT_CHECKSUM }}
-        - name: release
-          #if: github.ref_type == 'tag'
-          id: create_release
-          uses: actions/create-release@v1.1.4
-          with:
-            draft: false
-            prerelease: false
-            release_name: ics2csv4all ${{ github.ref_name }}
-            tag_name: ${{ github.ref_name }}
-            body_path: CHANGELOG.md
-          env:
-            GITHUB_TOKEN: ${{ github.token }}
-        - name: upload artifact ${{ env.project }}-${{ matrix.target }}.zip
-          #if: github.ref_type == 'tag'
-          uses: actions/upload-release-asset@v1
-          env:
-            GITHUB_TOKEN: ${{ github.token }}                     
-          with:
-            upload_url: ${{ steps.create_release.outputs.upload_url }}
-            asset_path:  ${{ steps.compile.outputs.BUILT_ARCHIVE }}
-            asset_name: ${{ env.project }}-${{ matrix.target }}.zip
-            asset_content_type: application/zip    
+    steps:
+    - name: checkout
+      uses: actions/checkout@v4.2.1
+    - name: compile
+      id: compile
+      uses: rust-build/rust-build.action@v1.4.5
+      with:
+        RUSTTARGET: ${{ matrix.target }}
+        EXTRA_FILES: "README.md LICENSE"
+    - name: upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.project }}-${{ matrix.target }}
+        path: |
+          ${{ steps.compile.outputs.BUILT_ARCHIVE }}
+          ${{ steps.compile.outputs.BUILT_CHECKSUM }}
+    - name: release
+      #if: github.ref_type == 'tag'
+      id: create_release
+      uses: actions/create-release@v1.1.4
+      with:
+        draft: false
+        prerelease: false
+        release_name: ics2csv4all ${{ github.ref_name }}
+        tag_name: ${{ github.ref_name }}
+        body_path: CHANGELOG.md
+    - name: upload artifact ${{ env.project }}-${{ matrix.target }}.zip
+      #if: github.ref_type == 'tag'
+      uses: actions/upload-release-asset@v1.0.2                   
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path:  ${{ steps.compile.outputs.BUILT_ARCHIVE }}
+        asset_name: ${{ env.project }}-${{ matrix.target }}.zip
+        asset_content_type: application/zip    
