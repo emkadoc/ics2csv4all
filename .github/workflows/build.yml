@@ -44,7 +44,7 @@ jobs:
           ${{ steps.compile_linux.outputs.BUILT_ARCHIVE }}
           ${{ steps.compile_linux.outputs.BUILT_CHECKSUM }}          
     - name: release
-      #if: github.ref_type == 'tag'
+      if: github.ref_type == 'tag'
       id: create_release
       uses: actions/create-release@v1.1.4
       with:
@@ -55,18 +55,18 @@ jobs:
         body_path: CHANGELOG.md
       continue-on-error: true                         
     - name: upload release asset ${{ env.project }}-${{ env.artifact_windows }}
-      #if: github.ref_type == 'tag'
+      if: github.ref_type == 'tag'
       uses: actions/upload-release-asset@v1.0.2                   
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path:  ${{ steps.compile_windows.outputs.BUILT_ARCHIVE }}
-        asset_name: ${{ env.project }}-${{ env.artifact_windows }}
+        asset_name: ${{ env.project }}-${{ env.artifact_windows }}.zip
         asset_content_type: application/zip
     - name: upload release asset ${{ env.project }}-${{ env.artifact_linux }}
-      #if: github.ref_type == 'tag'
+      if: github.ref_type == 'tag'
       uses: actions/upload-release-asset@v1.0.2                   
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path:  ${{ steps.compile_windows.outputs.BUILT_ARCHIVE }}
-        asset_name: ${{ env.project }}-${{ env.artifact_linux }}
+        asset_path:  ${{ steps.compile_linux.outputs.BUILT_ARCHIVE }}
+        asset_name: ${{ env.project }}-${{ env.artifact_linux }}.zip
         asset_content_type: application/zip          
