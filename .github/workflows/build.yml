@@ -1,13 +1,29 @@
-name: Build
+name: workflow
 on: [push]
 env:
   project: ics2csv4all
 jobs:
-  build:
-    name: build & release ics2csv4all ${{ matrix.target }}
+  release:
+    #if: github.ref_type == 'tag'    
     runs-on: ubuntu-latest
     permissions:
       contents: write    
+    name: create release ics2csv4all ${{ github.ref_name }}
+    steps:
+    - name: checkout
+      uses: actions/checkout@v4.2.1
+    - name: release
+      id: create_release
+      uses: actions/create-release@v1.1.4
+      with:
+        draft: false
+        prerelease: false
+        release_name: ics2csv4all ${{ github.ref_name }}
+        tag_name: ${{ github.ref_name }}
+        body_path: CHANGELOG.md      
+  build:
+    name: build & release ics2csv4all ${{ matrix.target }}
+    runs-on: ubuntu-latest 
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     strategy:
@@ -23,28 +39,18 @@ jobs:
       with:
         RUSTTARGET: ${{ matrix.target }}
         EXTRA_FILES: "README.md LICENSE"
-    - name: upload artifact
+    - name: upload build artifact
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.project }}-${{ matrix.target }}
         path: |
           ${{ steps.compile.outputs.BUILT_ARCHIVE }}
           ${{ steps.compile.outputs.BUILT_CHECKSUM }}
-    - name: release
-      #if: github.ref_type == 'tag'
-      id: create_release
-      uses: actions/create-release@v1.1.4
-      with:
-        draft: false
-        prerelease: false
-        release_name: ics2csv4all ${{ github.ref_name }}
-        tag_name: ${{ github.ref_name }}
-        body_path: CHANGELOG.md
-    - name: upload artifact ${{ env.project }}-${{ matrix.target }}.zip
+    - name: upload release asset ${{ env.project }}-${{ matrix.target }}.zip
       #if: github.ref_type == 'tag'
       uses: actions/upload-release-asset@v1.0.2                   
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        upload_url: https://github.com/emkadoc/ics2csv4all/releases/tag/${{ github.ref_name }}
         asset_path:  ${{ steps.compile.outputs.BUILT_ARCHIVE }}
         asset_name: ${{ env.project }}-${{ matrix.target }}.zip
         asset_content_type: application/zip    
