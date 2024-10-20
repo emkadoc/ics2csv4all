@@ -49,7 +49,7 @@ jobs:
         release_name: ics2csv4all ${{ github.ref_name }}
         tag_name: ${{ github.ref_name }}
         body_path: CHANGELOG.md
-        continue-on-error: true                
+      continue-on-error: true                
     - name: upload release asset ${{ env.project }}-${{ matrix.target }}.zip
       #if: github.ref_type == 'tag'
       uses: actions/upload-release-asset@v1.0.2                   
