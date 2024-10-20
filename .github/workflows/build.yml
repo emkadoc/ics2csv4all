@@ -21,7 +21,9 @@ jobs:
         prerelease: false
         release_name: ics2csv4all ${{ github.ref_name }}
         tag_name: ${{ github.ref_name }}
-        body_path: CHANGELOG.md      
+        body_path: CHANGELOG.md
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
   build:
     name: build & release ics2csv4all ${{ matrix.target }}
     runs-on: ubuntu-latest
@@ -49,7 +51,7 @@ jobs:
       #if: github.ref_type == 'tag'
       uses: actions/upload-release-asset@v1.0.2                   
       with:
-        upload_url: https://github.com/emkadoc/ics2csv4all/releases/tag/${{ github.ref_name }}
+        upload_url: ${{ needs.release.outputs.upload_url }}
         asset_path:  ${{ steps.compile.outputs.BUILT_ARCHIVE }}
         asset_name: ${{ env.project }}-${{ matrix.target }}.zip
         asset_content_type: application/zip    
