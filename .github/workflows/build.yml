@@ -35,12 +35,12 @@ jobs:
         with:
           draft: false
           prerelease: false
-          release_name: ics2csv4all ${{ github.ref }}
-          tag_name: ${{ github.ref }}
+          release_name: ics2csv4all ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
           body_path: CHANGELOG.md
         env:
           GITHUB_TOKEN: ${{ github.token }}
-      - name: upload artifact ${{ env.project }}-${{ matrix.target }}
+      - name: upload artifact ${{ env.project }}-${{ matrix.target }}.zip
         if: github.ref_type == 'tag'
         uses: actions/upload-release-asset@v1
         env:
