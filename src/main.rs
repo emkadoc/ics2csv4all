@@ -3,7 +3,6 @@ pub mod file;
 pub mod error;
 pub mod helper;
 
-use csv::{Reader, ReaderBuilder};
 use helper::calendar::{get_short_weekday, get_timestamp_localized};
 use chrono::{DateTime, FixedOffset, Local};
 use error::csv::write_error;
@@ -35,9 +34,9 @@ fn main() {
 
     println!("Downloading...");
     
-    // Local
+    // Local File
     //let file = std::fs::read_to_string(file_name.to_owned() + ".ics").unwrap();
-    // Remote
+    // Remote File
     let file = reqwest::blocking::get(config.cal_url).unwrap().text().unwrap();
     
     let ics_bytes = file.as_bytes();
@@ -46,7 +45,6 @@ fn main() {
     let mut found = false;
 
     let writer_result = csv::WriterBuilder::new().delimiter(b'\t').from_path(file_name.to_owned() + ".csv");
-    //let mut csv_writer = csv::WriterBuilder::new().delimiter(b',').from_writer(io::stdout());
     
     let mut csv_writer = match writer_result {
         Ok(writer) => writer,
@@ -112,7 +110,6 @@ fn main() {
         if property_ics.name == "DTSTART" && (property_ics_value.contains("Z") || property_ics_value.len() == 8) {
             let result_date = get_timestamp_localized(property_ics_value.to_string()).unwrap(); 
             if result_date.ge(&desired_date_start) && !result_date.gt(&desired_date_end) {
-                //println!("{}", result.to_string() + " " + &expected_date_start.to_string());
                 timestamp_start = get_timestamp_localized(property_ics_value.to_string()).unwrap();
             }
         };
@@ -120,7 +117,6 @@ fn main() {
         if property_ics.name == "DTEND" && (property_ics_value.contains("Z") || property_ics_value.len() == 8) {
             let result_date = get_timestamp_localized(property_ics_value.to_string()).unwrap(); 
             if result_date.ge(&desired_date_start) && !result_date.gt(&desired_date_end) {
-                //println!("{}", result.to_string() + " " + &expected_date_end.to_string());
                 timestamp_end = get_timestamp_localized(property_ics_value.to_string()).unwrap();
                 found = true;
             }
@@ -186,7 +182,7 @@ fn main() {
     match open::with("basic.csv", "notepad") {
         Ok(open_result) => {
             if open_result.success() {
-                println!("CSV file opened...");
+                println!("CSV file opened.");
             }
         },
         Err(error) => {
@@ -198,7 +194,7 @@ fn main() {
     confirm_with_enter();
 
     match delete("basic.csv") {
-        Ok(_) => println!("CSV file deleted..."),
+        Ok(_) => println!("CSV file deleted."),
         Err(_) => todo!(),
     };
 

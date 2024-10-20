@@ -3,24 +3,6 @@ on: [push]
 env:
   project: ics2csv4all
 jobs:
-  #build:
-  #  name: Build
-  #  runs-on: ubuntu-latest
-  #  steps:
-  #    - uses: actions/checkout@v4
-  #    - name: Compile
-  #      id: compile
-  #      uses: rust-build/rust-build.action@v1.4.5
-  #      with:
-  #        RUSTTARGET: x86_64-pc-windows-gnu
-  #        UPLOAD_MODE: none
-  #    - name: Upload artifact
-  #      uses: actions/upload-artifact@v4
-  #      with:
-  #        name: ${{ env.project }}
-  #        path: |
-  #          ${{ steps.compile.outputs.BUILT_ARCHIVE }}
-  #          ${{ steps.compile.outputs.BUILT_CHECKSUM }}
   release:
     name: release ${{ matrix.target }}
     runs-on: ubuntu-latest
@@ -45,4 +27,15 @@ jobs:
           name: ${{ env.project }}-${{ matrix.target }}
           path: |
             ${{ steps.compile.outputs.BUILT_ARCHIVE }}
-            ${{ steps.compile.outputs.BUILT_CHECKSUM }}                    
+            ${{ steps.compile.outputs.BUILT_CHECKSUM }}
+      - name: Create release
+        uses: actions/create-release@v1.1.4
+        id: create_release
+        with:
+          draft: false
+          prerelease: false
+          release_name: ics2csv4all ${{ github.ref }}
+          tag_name: ${{ github.ref }}
+          body_path: CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ github.token }}                         
