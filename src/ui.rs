@@ -30,14 +30,14 @@ pub mod cli {
     }
 
     pub fn get_header(cal_url: String) {
-        println!("__________________________________________________________");
-        println!("                                                          ");
-        println!("ics2cvs4all ----------- 2024.10.1 ----------- by M. Kittel");
-        println!("                   verwendeter Kalender:                  ");
+        println!("____________________________________________________________");
+        println!("                                                            ");
+        println!("ics2cvs4all ------------- 2024.10.1 -------------- M. Kittel");
+        println!("                     verwendeter Kalender:                  ");
         splitted_by_sub_len(cal_url, 58);
-        println!("----------------------------------------------------------");
-        println!("Bitte nachfolgend die zu exportierende Zeitspanne eingeben");
-        println!("__________________________________________________________");        
+        println!("------------------------------------------------------------");
+        println!("-Bitte nachfolgend die zu exportierende Zeitspanne eingeben-");
+        println!("____________________________________________________________");        
     }
 
     pub fn confirm_with_enter() {

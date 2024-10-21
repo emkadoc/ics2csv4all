@@ -6,6 +6,7 @@ pub mod helper;
 use helper::calendar::{get_short_weekday, get_timestamp_localized};
 use chrono::{DateTime, FixedOffset, Local};
 use error::csv::write_error;
+use reqwest::blocking;
 use ui::cli::{confirm_with_enter, get_header, get_input_desired_date};
 use file::json::{delete, read_config};
 
@@ -37,7 +38,7 @@ fn main() {
     // Local File
     //let file = std::fs::read_to_string(file_name.to_owned() + ".ics").unwrap();
     // Remote File
-    let file = reqwest::blocking::get(config.cal_url).unwrap().text().unwrap();
+    let file = blocking::get(config.cal_url).unwrap().text().unwrap();
     
     let ics_bytes = file.as_bytes();
     let ics_reader = ical::PropertyParser::from_reader(ics_bytes);
