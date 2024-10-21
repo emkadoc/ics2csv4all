@@ -13,15 +13,15 @@ jobs:
       fail-fast: false
     env:
       artifact_windows: x86_64-pc-windows-gnu
-      artifact_linux: x86_64-unknown-linux-musl        
+      artifact_linux: x86_64-unknown-linux-gnu        
     steps:
     - name: checkout
       uses: actions/checkout@v4.2.1
-    - name: compile for x86_64-pc-windows-gnu
+    - name: compile for ${{ env.artifact_windows }}
       id: compile_windows
       uses: rust-build/rust-build.action@v1.4.5
       with:
-        RUSTTARGET: x86_64-pc-windows-gnu
+        RUSTTARGET: ${{ env.artifact_windows }}
         EXTRA_FILES: "README.md LICENSE"
     - name: upload build artifact ${{ env.project }}-${{ env.artifact_windows }}
       uses: actions/upload-artifact@v4
