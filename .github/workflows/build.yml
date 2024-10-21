@@ -1,72 +1,133 @@
-name: build
+# GitHub Actions workflow configuration file
+
+name: Build and Release
+
+#on:
+#  push:
+#    tags:
+#      - "v*" # Trigger the workflow when a tag matching the pattern v*.*.* is pushed
 on: [push]
-env:
-  project: ics2csv4all
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
   build:
-    name: build & release ics2csv4all ${{ matrix.target }}
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write     
+    runs-on: ${{ matrix.os }} # Define the operating system on which the job runs
     strategy:
-      fail-fast: false
-    env:
-      artifact_windows: x86_64-pc-windows-gnu
-      artifact_linux: x86_64-unknown-linux-gnu        
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest] # Define the operating system matrix
+        arch: [x86_64] # Define the architecture matrix
+
     steps:
-    - name: checkout
-      uses: actions/checkout@v4.2.1
-    - name: compile for ${{ env.artifact_windows }}
-      id: compile_windows
-      uses: rust-build/rust-build.action@v1.4.5
-      with:
-        RUSTTARGET: ${{ env.artifact_windows }}
-        EXTRA_FILES: "README.md LICENSE"
-    - name: upload build artifact ${{ env.project }}-${{ env.artifact_windows }}
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ env.project }}-${{ env.artifact_windows }}
-        path: |
-          ${{ steps.compile_windows.outputs.BUILT_ARCHIVE }}
-          ${{ steps.compile_windows.outputs.BUILT_CHECKSUM }}
-    - name: compile for ${{ env.artifact_linux }}
-      id: compile_linux
-      uses: rust-build/rust-build.action@v1.4.5
-      with:
-        RUSTTARGET: ${{ env.artifact_linux }}
-        EXTRA_FILES: "README.md LICENSE"
-    - name: upload build artifact ${{ env.project }}-${{ env.artifact_linux }}
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ env.project }}-${{ env.artifact_linux }}
-        path: |
-          ${{ steps.compile_linux.outputs.BUILT_ARCHIVE }}
-          ${{ steps.compile_linux.outputs.BUILT_CHECKSUM }}          
-    - name: release
-      if: github.ref_type == 'tag'
-      id: create_release
-      uses: actions/create-release@v1.1.4
-      with:
-        draft: false
-        prerelease: false
-        release_name: ics2csv4all ${{ github.ref_name }}
-        tag_name: ${{ github.ref_name }}
-        body_path: CHANGELOG.md
-      continue-on-error: true                         
-    - name: upload release asset ${{ env.project }}-${{ env.artifact_windows }}
-      if: github.ref_type == 'tag'
-      uses: actions/upload-release-asset@v1.0.2                   
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path:  ${{ steps.compile_windows.outputs.BUILT_ARCHIVE }}
-        asset_name: ${{ env.project }}-${{ env.artifact_windows }}.zip
-        asset_content_type: application/zip
-    - name: upload release asset ${{ env.project }}-${{ env.artifact_linux }}
-      if: github.ref_type == 'tag'
-      uses: actions/upload-release-asset@v1.0.2                   
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path:  ${{ steps.compile_linux.outputs.BUILT_ARCHIVE }}
-        asset_name: ${{ env.project }}-${{ env.artifact_linux }}.zip
-        asset_content_type: application/zip          
+      - name: Checkout code
+        uses: actions/checkout@v2 # Check out the repository code
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1 # Set up the Rust toolchain
+        with:
+          toolchain: stable # Use the stable Rust toolchain
+          profile: minimal # Use the minimal configuration file
+          override: true # Override any existing Rust toolchain settings
+
+      - name: Build project
+        run: cargo build --release # Build the release version of the project
+
+      # Upload build artifacts for Linux x86_64 platform
+      - name: Upload artifact (Linux)
+        if: matrix.os == 'ubuntu-latest' && matrix.arch == 'x86_64'
+        uses: actions/upload-artifact@v2
+        with:
+          name: ubuntu-latest-ics2csv4all
+          path: target/release/ics2csv4all
+
+      # Upload build artifacts for macOS x86_64 platform
+      - name: Upload artifact (macOS)
+        if: matrix.os == 'macos-latest' && matrix.arch == 'x86_64'
+        uses: actions/upload-artifact@v2
+        with:
+          name: macos-latest-ics2csv4all
+          path: target/release/ics2csv4all
+
+      # Upload build artifacts for Windows x86_64 platform
+      - name: Upload artifact (Windows)
+        if: matrix.os == 'windows-latest' && matrix.arch == 'x86_64'
+        uses: actions/upload-artifact@v2
+        with:
+          name: windows-latest-ics2csv4all
+          path: target/release/ics2csv4all.exe
+
+  release:
+    runs-on: ubuntu-latest # Define the job to run on Ubuntu
+    needs: build # Depends on the build job
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2 # Check out the repository code
+
+      # Download build artifacts for Linux x86_64 platform
+      - name: Download artifact (Linux-x86_64)
+        uses: actions/download-artifact@v2
+        with:
+          name: ubuntu-latest-ics2csv4all
+          path: artifacts/ubuntu
+
+      # Download build artifacts for macOS x86_64 platform
+      - name: Download artifact (macOS-x86_64)
+        uses: actions/download-artifact@v2
+        with:
+          name: macos-latest-ics2csv4all
+          path: artifacts/macos
+
+      # Download build artifacts for Windows x86_64 platform
+      - name: Download artifact (Windows-x86_64)
+        uses: actions/download-artifact@v2
+        with:
+          name: windows-latest-ics2csv4all
+          path: artifacts/windows
+
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1 # Create a GitHub release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Authenticate using GitHub token
+        with:
+          tag_name: ${{ github.ref_name }} # Use the pushed tag name
+          release_name: Release ${{ github.ref_name }} # Use the pushed tag name as the release name
+          body: |
+            Changes in this Release
+            - First Change
+            - Second Change # Release notes
+          draft: false # Whether it's a draft
+          prerelease: false # Whether it's a prerelease
+
+      # Upload Linux x86_64 build artifact to the release page
+      - name: Upload Linux x86_64 artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Authenticate using GitHub token
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # Use the upload URL generated by the create release step
+          asset_path: artifacts/ubuntu/ics2csv4all # Path of the file to upload
+          asset_name: ics2csv4all-linux-x86_64 # Name of the file to upload
+          asset_content_type: application/octet-stream # File content type
+
+      # Upload macOS x86_64 build artifact to the release page
+      - name: Upload macOS x86_64 artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Authenticate using GitHub token
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # Use the upload URL generated by the create release step
+          asset_path: artifacts/macos/ics2csv4all # Path of the file to upload
+          asset_name: ics2csv4all-macos-x86_64 # Name of the file to upload
+          asset_content_type: application/octet-stream # File content type
+
+      # Upload Windows x86_64 build artifact to the release page
+      - name: Upload Windows x86_64 artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Authenticate using GitHub token
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # Use the upload URL generated by the create release step
+          asset_path: artifacts/windows/ics2csv4all.exe # Path of the file to upload
+          asset_name: ics2csv4all-windows-x86_64.exe # Name of the file to upload
+          asset_content_type: application/octet-stream # File content type
