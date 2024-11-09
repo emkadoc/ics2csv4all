@@ -1,0 +1,7 @@
+{
+	"name": "Rust",
+	"image": "mcr.microsoft.com/vscode/devcontainers/rust:1",
+	"runArgs": ["--userns=keep-id"],
+	"containerUser": "vscode",
+	"postCreateCommand": "sudo apt update && sudo apt -y install mingw-w64 && rustup target add x86_64-pc-windows-gnu"
+}
