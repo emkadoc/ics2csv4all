@@ -1,7 +1,8 @@
 {
 	"name": "Rust",
-	"image": "mcr.microsoft.com/vscode/devcontainers/rust:1",
+	"image": "mcr.microsoft.com/devcontainers/base:0-alpine-3.20",
 	"runArgs": ["--userns=keep-id"],
 	"containerUser": "vscode",
-	"postCreateCommand": "sudo apt update && sudo apt -y install mingw-w64 && rustup target add x86_64-pc-windows-gnu"
+	"postCreateCommand": "sudo apk add --no-cache mingw-w64-gcc && sudo apk add --no-cache curl && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain stable -y && source $HOME/.cargo/env && rustup target add x86_64-pc-windows-gnu",
+	"postStartCommand": "source $HOME/.cargo/env"
 }
