@@ -3,6 +3,7 @@ pub mod file;
 pub mod error;
 pub mod helper;
 
+use csv::QuoteStyle;
 use helper::calendar::{get_short_weekday, get_timestamp_localized};
 use chrono::{DateTime, FixedOffset, Local};
 use error::csv::write_error;
@@ -45,7 +46,11 @@ fn main() {
 
     let mut found = false;
 
-    let writer_result = csv::WriterBuilder::new().delimiter(b'\t').from_path(file_name.to_owned() + ".csv");
+    let writer_result = csv::WriterBuilder::new()
+    .delimiter(b',')
+    .quote(b'\'')
+    .quote_style(QuoteStyle::NonNumeric)
+    .from_path(file_name.to_owned() + ".csv");
     
     let mut csv_writer = match writer_result {
         Ok(writer) => writer,
@@ -179,8 +184,14 @@ fn main() {
         Ok(writer) => writer,
         Err(_) => todo!(),
     };
+    
+    let mut app = "notepad";
+    if cfg!(unix) {
+        app = "vim";   
+    }
+    let filename = "basic.csv";
 
-    match open::with("basic.csv", "notepad") {
+    match open::with(filename, app) {
         Ok(open_result) => {
             if open_result.success() {
                 println!("CSV file opened.");

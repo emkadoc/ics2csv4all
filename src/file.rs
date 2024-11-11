@@ -7,7 +7,8 @@ pub mod json {
         pub cal_url: String,
     }
     pub fn read_config() -> Result<Config, Box<dyn Error>> {
-        let reader = BufReader::new(File::open("config.json").unwrap());
+        let filename = "config.json";
+        let reader = BufReader::new(File::open(filename).unwrap());
         let config = serde_json::from_reader(reader).unwrap();
         return Ok(config);
     }
