@@ -1,4 +1,4 @@
-# About "ics2csv4win"
+# About "ics2csv4all"
 This is an exporter for online ics calendars written in Rust[^1]. 
 It downloads all appointments by the given time period and transfers the results into character/tab separated values (csv).
 
